@@ -1,8 +1,9 @@
 class Animal:
     hungry = 100
 
-    def __init__(self, name):
+    def __init__(self, name, weight):
         self.name = name
+        self.weight = weight
 
     def eat(self, value):
         self.hungry += int(value)
@@ -74,16 +75,16 @@ class Duck(Animal, FruitOfEggs):
         return 'Duck vote'
 
 
-goose_gray = Goose('Gray')
-goose_white = Goose('White')
-cow_manyka = Cow('Manyka')
-sheep_barash = Sheep('Barash')
-sheep_kudr = Sheep('Kudr')
-chicken_koko = Chicken('Koko')
-chiken_kukareku = Chicken('Kukareku')
-goat_roga = Goat('Roga')
-goat_kopito = Goat('Kopito')
-duck_kryakva = Duck('Kryakva')
+goose_gray = Goose('Gray', 100)
+goose_white = Goose('White', 100)
+cow_manyka = Cow('Manyka', 200)
+sheep_barash = Sheep('Barash', 200)
+sheep_kudr = Sheep('Kudr', 300)
+chicken_koko = Chicken('Koko', 300)
+chiken_kukareku = Chicken('Kukareku', 400)
+goat_roga = Goat('Roga', 500)
+goat_kopito = Goat('Kopito', 600)
+duck_kryakva = Duck('Kryakva', 700)
 
 animals_farm = [goose_gray, goose_white, cow_manyka, sheep_barash, sheep_kudr, chicken_koko,
                 chiken_kukareku, goat_roga, goat_kopito, duck_kryakva]
@@ -106,4 +107,21 @@ def spend_day():
             animal.get_eggs()
 
 
+def calculate_weight_animals(animals):
+    total_weight = 0
+    for animal in animals:
+        total_weight += animal.weight
+    return total_weight
+
+
+def get_heaviest_animal(animals):
+    max_weight = 0
+    for animal in animals:
+        max_weight = max(max_weight, animal.weight)
+    return max_weight
+
+
 spend_day()
+print(calculate_weight_animals(animals_farm))
+print(get_heaviest_animal(animals_farm))
+
