@@ -3,9 +3,13 @@ from DATA import directories, documents
 
 def print_name():
     doc_number = input('Введите номер документа: ')
+    finded = False
     for doc in documents:
         if doc['number'] == doc_number:
+            finded = True
             print(doc['name'])
+    if not finded:
+        print('Документ не найден')
 
 
 def print_documents():
@@ -21,9 +25,17 @@ def print_regiment():
 
 
 def add_directory():
-    number, type, name, number_directory = input('Введите данные').split()
+    number = input('Введите номер документа: ')
+    type = input('Введите тип документа: ')
+    name = input('Введите имя владельца: ')
+    number_directory = input('Введите номер полки,на которую нужно положить документ: ')
     item = {'type': type, 'number': number, 'name': name}
-    directories[number] = item
+    documents.append(item)
+    try:
+        directories[number_directory].append(number)
+    except:
+        directories[number_directory] = [number]
+    print(directories, documents)
 
 
 def delete_doc():
