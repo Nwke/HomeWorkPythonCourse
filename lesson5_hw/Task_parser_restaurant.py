@@ -1,7 +1,7 @@
 cook_book = {}
 
 
-def pars_data_restaurant():
+def parse_data_restaurant():
     with open('DATA_FROM_RESTAURANT', encoding='utf8') as f:
         for line in f:
             dish_name = line.strip()
@@ -29,8 +29,7 @@ def get_shop_list_by_dishes(dishes, person_count):
             if ingr_name not in necessery_ing:
                 necessery_ing[ingr_name] = {'quantity': quantity, 'measure': measure}
             else:
-                quantity += necessery_ing[ingr_name]['quantity']
-                necessery_ing[ingr_name]['quantity'] = quantity
+                necessery_ing[ingr_name]['quantity'] += quantity
     return necessery_ing
 
 
