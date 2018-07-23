@@ -1,23 +1,25 @@
-cook_book = {}
+from pprint import pprint
+CURRENT_FILE = 'DATA_FROM_RESTAURANT.txt'
 
 
-def parse_data_restaurant():
-    with open('DATA_FROM_RESTAURANT', encoding='utf8') as f:
+def get_cook_book_restaurant(file):
+    cook_book = {}
+
+    with open(file, encoding='utf8') as f:
         for line in f:
             dish_name = line.strip()
             cook_book[dish_name] = []
             f.readline()
             next_line = f.readline().strip()
             while next_line:
-                ingr_name, quantity, measure = next_line.strip().split('|')
+                ingr_name, quantity, measure = list(map(str.strip, next_line.split('|')))
                 cook_book[dish_name].append({'ingridient_name': ingr_name, 'quantity': quantity, 'measure': measure})
                 next_line = f.readline().strip()
 
+    return cook_book
 
-pars_data_restaurant()
 
-
-def get_shop_list_by_dishes(dishes, person_count):
+def get_shop_list_by_dishes(dishes, person_count, cook_book):
     necessery_ing = {}
 
     for dish in dishes:
@@ -33,4 +35,4 @@ def get_shop_list_by_dishes(dishes, person_count):
     return necessery_ing
 
 
-print(get_shop_list_by_dishes(['Запеченный картофель', 'Омлет'], 2))
+pprint(get_shop_list_by_dishes(['Запеченный картофель', 'Омлет'], 2, get_cook_book_restaurant(CURRENT_FILE)))
