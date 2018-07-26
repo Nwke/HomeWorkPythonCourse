@@ -1,10 +1,18 @@
 from collections import Counter
 from pprint import pprint
 import json
+import codecs
+import os
+
+print(os.chdir('..'))
+print(os.getcwd())
+
+
+need_proc_files = ['newsafr.json', 'newsit.json', 'newsfr.json']
 
 
 def parse_news(file_name: str) -> None:
-    with open(file_name, encoding='utf8') as json_file:
+    with codecs.open(file_name, encoding='utf8', errors='ignore') as json_file:
         news = json.load(json_file)
 
     articles = news['rss']['channel']['items']
@@ -20,7 +28,7 @@ def parse_news(file_name: str) -> None:
     for i in range(10):
         print(freq_counter.pop(0)[0])
 
-    pprint('==== Файл обработан ====')
+    pprint('==== Файл {} обработан ===='.format(file_name))
 
 
 def add_to_counter(dict_counter: dict, word: str) -> None:
@@ -29,8 +37,6 @@ def add_to_counter(dict_counter: dict, word: str) -> None:
     except:
         dict_counter[word] = 1
 
-
-need_proc_files = ['newsafr.json', 'newsit.json', 'newsfr.json']
 
 for file in need_proc_files:
     parse_news(file)

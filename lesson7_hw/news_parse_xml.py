@@ -3,9 +3,25 @@ from pprint import pprint
 import xml.etree.ElementTree as ET
 
 
-def parse_news(file_name):
+need_proc_files = ['newsafr.xml', 'newsfr.xml', 'newsit.xml']
+encoding = ['utf-8', 'utf-16', 'GBK', 'windows-1251', 'ASCII']
 
-    tree = ET.parse(file_name)
+
+def check_enc(filename):
+    for enc in encoding:
+        try:
+            open(filename, encoding=enc).read()
+        except (UnicodeDecodeError, LookupError):
+            pass
+        else:
+            return enc
+
+
+def parse_news(file_name):
+    enc = check_enc(file_name)
+    print(enc)
+    parser = ET.XMLParser(encoding=enc)
+    tree = ET.parse(file_name, parser=parser)
     root = tree.getroot()
     freq_counter = Counter()
 
@@ -21,7 +37,8 @@ def parse_news(file_name):
     for i in range(10):
         print(freq_counter.pop(0)[0])
 
-    pprint('==== Файл обработан ====')
+    pprint('==== Файл {} обработан ===='.format(file_name))
+
 
 def add_to_counter(dict_counter, word):
     try:
@@ -29,8 +46,6 @@ def add_to_counter(dict_counter, word):
     except:
         dict_counter[word] = 1
 
-
-need_proc_files = ['newsafr.xml', 'newsit.xml', 'newsfr.xml']
 
 for file in need_proc_files:
     parse_news(file)
