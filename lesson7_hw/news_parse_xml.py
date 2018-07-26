@@ -1,6 +1,9 @@
 from collections import Counter
 from pprint import pprint
 import xml.etree.ElementTree as ET
+import os
+
+os.chdir('data')
 
 
 need_proc_files = ['newsafr.xml', 'newsfr.xml', 'newsit.xml']
