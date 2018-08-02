@@ -1,31 +1,43 @@
 import os
-from pprint import pprint
-from glob import glob
 
-
-abs_path = os.path.dirname(os.path.realpath(__file__))
-abs_path = os.path.join(abs_path, 'Migrations')
-os.chdir(abs_path)
-
-search_words = set()
+FILES_DIR = 'Migrations/'
 cur_success_files = set()
-black_list_files = set()
 
-while True:
-    new_word = input('Введите слово,по которому будем совершать поиск (чтобы выйти введите y): ')
-    if new_word == 'y':
-        break
 
-    search_words.add(new_word)
+def print_files(files):
+    for file in files:
+        print(file)
 
-    for filename in glob('*.sql'):
-        with open(filename, encoding='utf8') as sql_file:
-            for word in search_words:
-                if word in sql_file.read() and sql_file.name not in black_list_files:
-                    cur_success_files.add(sql_file.name)
-                else:
-                    black_list_files.add(sql_file.name)
+
+def main_search():
+    while True:
+        word = input('Введите слово,по которому будем совершать поиск (чтобы выйти ничего не вводите): ')
+        if word == '':
+            break
+
+        files_copy = cur_success_files.copy()
+        print('-----ИЩЕМ ФАЙЛЫ-----')
+        for file in files_copy:
+            with open(file, encoding='utf8') as sql_file:
+                if word not in sql_file.read():
                     cur_success_files.discard(sql_file.name)
 
-    pprint(cur_success_files)
-    print('Всего: {}'.format(len(cur_success_files)))
+        print_files(cur_success_files)
+        print('-----ЗАКОНЧИЛИ ИСКАТЬ-----')
+
+
+first_word = input('Введите слово,по которому будем совершать поиск (чтобы выйти ничего не вводите): ')
+if first_word != '':
+    for filename in os.listdir('Migrations'):
+        file = FILES_DIR + filename
+        if file.endswith('.sql'):
+            with open(file, encoding='utf8') as sql_file:
+                if first_word in sql_file.read():
+                    cur_success_files.add(sql_file.name)
+
+    print_files(cur_success_files)
+    main_search()
+    print('Найденные файлы: ')
+    print_files(cur_success_files)
+
+print('Всего: {}'.format(len(cur_success_files)))

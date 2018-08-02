@@ -1,9 +1,15 @@
 import subprocess
 import shutil
 import os
+import glob
 
+DIR_INPUT = 'Source'
+DIR_OUT = 'Result'
 
 os.mkdir('Result')
-for file in os.listdir(r'Source'):
-    subprocess.run(r'convert Source/{0} -resize 200 {1}_new.jpg'.format(file, file[:-4]))
-    shutil.move(src='{}'.format(file[:-4] + '_new.jpg'), dst='Result')
+for file in glob.glob('Source/*.jpg'):
+    file_name_old = file.replace('Source\\', '')
+    file_name_new = file_name_old[:-4] + '_new.jpg'
+    subprocess.run(rf'convert {DIR_INPUT}/{file_name_old} -resize 200 {DIR_OUT}/{file_name_new}')
+
+
