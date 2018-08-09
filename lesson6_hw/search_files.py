@@ -1,7 +1,6 @@
 import os
 
 FILES_DIR = 'Migrations/'
-cur_success_files = set()
 
 
 def print_files(files):
@@ -9,35 +8,39 @@ def print_files(files):
         print(file)
 
 
-def main_search():
+def main_search(success_files):
     while True:
-        word = input('Введите слово,по которому будем совершать поиск (чтобы выйти ничего не вводите): ')
-        if word == '':
+        word = input('Введите слово,по которому будем совершать поиск файлов (чтобы выйти ничего не вводите): ')
+        if not word:
+            main_out(success_files)
             break
 
-        files_copy = cur_success_files.copy()
+        files_copy = success_files.copy()
         print('-----ИЩЕМ ФАЙЛЫ-----')
         for file in files_copy:
             with open(file, encoding='utf8') as sql_file:
                 if word not in sql_file.read():
-                    cur_success_files.discard(sql_file.name)
+                    success_files.discard(sql_file.name)
 
-        print_files(cur_success_files)
+        print('\n'.join(list(success_files)))
         print('-----ЗАКОНЧИЛИ ИСКАТЬ-----')
 
 
-first_word = input('Введите слово,по которому будем совершать поиск (чтобы выйти ничего не вводите): ')
-if first_word != '':
+def entry():
+    suitable_files = set()
     for filename in os.listdir('Migrations'):
-        file = FILES_DIR + filename
+        file = os.path.join(FILES_DIR, filename)
         if file.endswith('.sql'):
-            with open(file, encoding='utf8') as sql_file:
-                if first_word in sql_file.read():
-                    cur_success_files.add(sql_file.name)
+            suitable_files.add(file)
+    print('Мы нашли все sql-файлы в папке Migrations')
+    main_search(suitable_files)
 
-    print_files(cur_success_files)
-    main_search()
+
+def main_out(success_files):
     print('Найденные файлы: ')
-    print_files(cur_success_files)
+    print_files(success_files)
+    print('Всего: {}'.format(len(success_files)))
 
-print('Всего: {}'.format(len(cur_success_files)))
+
+if __name__ == '__main__':
+    entry()
