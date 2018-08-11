@@ -46,7 +46,7 @@ def get_friends(user_id, params=None, extended=0, add_params=None):
 
 def main():
     investigated = input('Введите ник или id для обработки: ')
-    permissible_friend = int(input('Введите допустимое количество друзей в группах'))
+    permissible_friend = int(input('Введите допустимое количество друзей в группах: '))
 
     investigated_friends = set(get_friends(investigated))
     investigated_groups = get_groups(investigated, extended=True, add_params={'fields': 'members_count'})
@@ -56,14 +56,14 @@ def main():
     all_groups_friends = set()
 
     count_friend = len(investigated_friends)
-    
+    dict_friends = {}
     for friend in investigated_friends:
         print(f'Осталось обработать {count_friend} друзей')
         print('Отправляем запрос...')
 
         try:
-            group_friend = get_groups(friend)
-            all_groups_friends.update(group_friend)
+            group_friend = set(get_groups(friend))
+            dict_friends[friend] = group_friend
 
         except (KeyError, requests.exceptions.RequestException):
             pass
@@ -74,19 +74,28 @@ def main():
 
     print('Подготавливаем результат...')
 
-    succcess_groups_id = investigated_groups_id - all_groups_friends
-    succes_groups = []
+    success_groups_id = []
+
+    for investigated_group in investigated_groups_id:
+        curr_count_users = 0
+        for groups in dict_friends.values():
+            if investigated_group in groups:
+                curr_count_users += 1
+        if permissible_friend - curr_count_users >= 0:
+            success_groups_id.append(investigated_group)
+
+    success_groups = []
 
     for group in investigated_groups:
-        if group['id'] in succcess_groups_id:
-            succes_groups.append({
+        if group['id'] in success_groups_id and 'deactivated' not in group and group['is_closed'] != 1:
+            success_groups.append({
                 'name': group['name'],
                 'gid': group['id'],
                 'members_count': group['members_count']
             })
 
     with open('groups.json', 'w+', encoding='utf8') as res_file:
-        json.dump(succes_groups, res_file, ensure_ascii=False, indent=2)
+        json.dump(success_groups, res_file, ensure_ascii=False, indent=2)
 
     print('Результат работы в файле groups.json')
 
