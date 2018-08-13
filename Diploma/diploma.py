@@ -10,6 +10,8 @@ SERVICE_TOKEN = '4d28efa04d28efa04d28efa0a74d4d8cf844d284d28efa016464fcfc0449c66
 GET_GROUPS = 'groups.get'
 GET_FRIENDS = 'friends.get'
 
+RESTRICT_IS_MEMBER = 500
+
 
 def send_req(method, params):
     return requests.get(f'https://api.vk.com/method/{method}', params=params)
@@ -21,7 +23,6 @@ def process_param(user_id, params, extended, add_params):
         params = {
             'access_token': TOKEN_VK_API,
             'v': 5.80,
-            'user_id': user_id,
             'extended': extended
         }
     try:
@@ -48,41 +49,41 @@ def main():
     investigated = input('Введите ник или id для обработки: ')
     permissible_friend = int(input('Введите допустимое количество друзей в группах: '))
 
-    investigated_friends = set(get_friends(investigated))
+    investigated_friends = list(map(str, get_friends(investigated)))
     investigated_groups = get_groups(investigated, extended=True, add_params={'fields': 'members_count'})
 
     investigated_groups_id = {group['id'] for group in investigated_groups}
 
-    all_groups_friends = set()
-
-    count_friend = len(investigated_friends)
-    dict_friends = {}
-    for friend in investigated_friends:
-        print(f'Осталось обработать {count_friend} друзей')
-        print('Отправляем запрос...')
-
-        try:
-            group_friend = set(get_groups(friend))
-            dict_friends[friend] = group_friend
-
-        except (KeyError, requests.exceptions.RequestException):
-            pass
-
-        finally:
-            count_friend -= 1
-            time.sleep(0.5)
-
-    print('Подготавливаем результат...')
-
     success_groups_id = []
 
     for investigated_group in investigated_groups_id:
+        print('Отправляем запрос...')
+
         curr_count_users = 0
-        for groups in dict_friends.values():
-            if investigated_group in groups:
-                curr_count_users += 1
+        remaining_users = investigated_friends.copy()  # list users id
+        while remaining_users:
+            users_id = ','.join(remaining_users[:RESTRICT_IS_MEMBER])
+            remaining_users = remaining_users[RESTRICT_IS_MEMBER:]
+
+            req_inside = '"group_id": "{}", "user_ids": "{}"'.format(investigated_group, users_id)
+            code = "return API.groups.isMember({{{}}});".format(req_inside)
+
+            params = {
+                'access_token': TOKEN_VK_API,
+                'v': 5.80,
+                'code': code
+            }
+
+            is_members = requests.get('https://api.vk.com/method/execute', params=params).json()['response']
+
+            for obj_member in is_members:
+                curr_count_users += obj_member['member']
+            time.sleep(0.5)
+
         if permissible_friend - curr_count_users >= 0:
             success_groups_id.append(investigated_group)
+
+    print('Подготавливаем результат..')
 
     success_groups = []
 
