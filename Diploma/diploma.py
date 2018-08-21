@@ -129,6 +129,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# больше функций
-#  curr_count_users -> curr_users_in_group
