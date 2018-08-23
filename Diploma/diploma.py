@@ -18,15 +18,12 @@ def send_req(method, user_id=None, params=None, extended=0, add_params=None):
     params = process_param(user_id, params, extended, add_params)
     req = requests.get(f'https://api.vk.com/method/{method}', params=params).json()
 
-    try:
-        if 'error' in req and req['error']['error_code'] == 6:
+    if 'error' in req and req['error']['error_code'] == 6:
+        time.sleep(2)
+        while 'error' in req and req['error']['error_code'] == 6:
+            req = requests.get(f'https://api.vk.com/method/{method}', params=params).json()
             time.sleep(2)
-            while 'error' in req and req['error']['error_code'] == 6:
-                req = requests.get(f'https://api.vk.com/method/{method}', params=params).json()
-                time.sleep(2)
-            return req
-    except KeyError:
-        pass
+        return req
 
     return req
 
