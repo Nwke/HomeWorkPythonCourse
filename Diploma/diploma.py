@@ -16,10 +16,22 @@ RESTRICT_IS_MEMBER = config.RESTRICT_IS_MEMBER
 
 def send_req(method, user_id=None, params=None, extended=0, add_params=None):
     params = process_param(user_id, params, extended, add_params)
-    return requests.get(f'https://api.vk.com/method/{method}', params=params)
+    req = requests.get(f'https://api.vk.com/method/{method}', params=params).json()
+
+    try:
+        if 'error' in req and req['error']['error_code'] == 6:
+            time.sleep(2)
+            while 'error' in req and req['error']['error_code'] == 6:
+                req = requests.get(f'https://api.vk.com/method/{method}', params=params).json()
+                time.sleep(2)
+            return req
+    except KeyError:
+        pass
+
+    return req
 
 
-def process_param(user_id, params, extended, add_params):
+def process_param(user_id, params, extended=0, add_params=None):
     add_params = {} if add_params is None else add_params
     if params is None:
         params = {
@@ -39,30 +51,18 @@ def process_param(user_id, params, extended, add_params):
 
 
 def get_groups(user_id, params=None, extended=0, add_params=None):
-    req = send_req(GET_GROUPS, user_id, params, extended, add_params).json()
-    try:
-        return req['response']['items']
-    except KeyError:
-        time.sleep(0.5)
-        return req['response']['items']
+    req = send_req(GET_GROUPS, user_id, params, extended, add_params)
+    return req['response']['items']
 
 
 def get_friends(user_id, params=None, extended=0, add_params=None):
-    req = send_req(GET_FRIENDS, user_id, params, extended, add_params).json()
-    try:
-        return req['response']['items']
-    except KeyError:
-        time.sleep(0.5)
-        return req['response']['items']
+    req = send_req(GET_FRIENDS, user_id, params, extended, add_params)
+    return req['response']['items']
 
 
 def is_members(add_params):
-    req = send_req(IS_MEMBER, add_params=add_params).json()
-    try:
-        return req['response']
-    except KeyError:
-        time.sleep(1)
-        return send_req(IS_MEMBER, add_params=add_params).json()['response']
+    req = send_req(IS_MEMBER, add_params=add_params)
+    return req['response']
 
 
 def form_success_groups(investigated_groups, success_groups_id):
@@ -111,8 +111,8 @@ def main():
 
             members = is_members(add_params=add_params)
 
-            # obj_member['member'] хранит 0 или 1
-            # т.е. есть человек в группе или нет
+            # obj_member['member'] stores 0 or 1
+            # => are person in group or not
             for obj_member in members:
                 curr_users_in_group += obj_member['member']
 
