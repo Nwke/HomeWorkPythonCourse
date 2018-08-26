@@ -1,6 +1,5 @@
 import requests
 import time
-import requests.exceptions
 import json
 import config
 import VK_API
@@ -10,6 +9,7 @@ TOKEN_VK_API = config.TOKEN_VK_API
 GET_GROUPS = VK_API.GET_GROUPS
 GET_FRIENDS = VK_API.GET_FRIENDS
 IS_MEMBER = VK_API.IS_MEMBER
+MANY_REQUESTS_ERROR = VK_API.MANY_REQUESTS_ERROR
 
 RESTRICT_IS_MEMBER = config.RESTRICT_IS_MEMBER
 
@@ -18,9 +18,9 @@ def send_req(method, user_id=None, params=None, extended=0, add_params=None):
     params = process_param(user_id, params, extended, add_params)
     req = requests.get(f'https://api.vk.com/method/{method}', params=params).json()
 
-    if 'error' in req and req['error']['error_code'] == 6:
+    if 'error' in req and req['error']['error_code'] == MANY_REQUESTS_ERROR:
         time.sleep(2)
-        while 'error' in req and req['error']['error_code'] == 6:
+        while 'error' in req and req['error']['error_code'] == MANY_REQUESTS_ERROR:
             req = requests.get(f'https://api.vk.com/method/{method}', params=params).json()
             time.sleep(2)
         return req
