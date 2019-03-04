@@ -1,2 +1,1 @@
-# PythonHomeWorkNetologyCours
-Домашние задания с курса по python
+# Homework of Python basic course
